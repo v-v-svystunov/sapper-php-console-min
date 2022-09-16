@@ -1,0 +1,91 @@
+#!/usr/bin/env php
+<?php
+namespace Matrix;
+define("MAIN_NAMESPACE", "Matrix");
+require_once('Core/CliProcessor.php');
+require_once('Core/Autoloader.php');
+require_once('Core/ExceptionProcessor.php');
+
+use Matrix\Config\init as Config;
+use Matrix\Core\Autoloader;
+use Matrix\Core\CliProcessor;
+use Matrix\Core\ExceptionProcessor;
+
+/**
+ *
+ * @package	Sapper Main
+ * @author  Svistunov Valery (VVS)
+ * @version	1.1
+ *
+ */
+define("MAIN_APP_ROOT", str_replace("\\", "/", __DIR__) . '/');
+
+date_default_timezone_set("Europe/Kiev");
+
+if(function_exists('xdebug_disable')) { xdebug_disable(); }
+
+error_reporting(0);
+register_shutdown_function('Matrix\Core\ExceptionProcessor::onFatalError');
+
+$autoloader = new Autoloader(array('config','Core', 'Model', 'View'));
+
+
+if (!$check = CliProcessor::init()) {
+	try {
+		throw new \Exception("ERROR: main::Cli::Init closed with error: saper must be run as a CLI application");
+	} catch (\Exception $e) {
+		$err = new ExceptionProcessor($e);
+		exit;
+	}
+}
+
+if (!$cli_key = CliProcessor::get_key()) {
+	CliProcessor::show_help();
+} 
+
+[$action, $param, $additional] = $cli_key;
+
+
+
+if (in_array($action,["h","help"])) {
+	CliProcessor::show_help();
+}
+
+$controller = 'Matrix\Controller\SaperController';
+
+if (!class_exists ($controller)) {
+	CliProcessor::show_help("ERROR: main::Cli::Init closed with error: controller `".$controller."` did not find");
+}
+
+$controller = new  $controller();
+
+switch ($action) {
+	case "v":
+		$method = 'viewOpenedGridAction';
+		break;
+	case "i":
+		$method = 'initNewGameAction';
+		break;
+	case "m":
+		$method = 'moveGameAction';
+		break;
+	case "t":
+		$method = 'testGameAction';
+		break;
+	default:
+		CliProcessor::show_help();
+		break;
+}
+
+
+if ( method_exists ( $controller, $method ) ) {
+	Config::main();
+	$controller->param = $param;
+	$controller->additional = $additional;
+	$controller->$method();
+	exit;
+}
+CliProcessor::show_help("ERROR: main::Cli::Init closed with error: execution method `".$method."` did not placed to the Module `Saper`"); 
+
+exit;
+?>

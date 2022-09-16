@@ -1,0 +1,27 @@
+{
+    "name": "game/saper",
+    "type": "project",
+    "license": "MIT",
+    "description": "Game Sapper is realized by PHP usage as console application with minimal dependencies",
+    "minimum-stability": "beta",
+    "prefer-stable": false,
+    "require": {
+        "php": ">=7.4.16",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "ext-json": "*",
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Matrix\\": "/"
+        }
+    },
+    "scripts": {
+    },
+    "conflict": {
+    },
+    "extra": {
+    }
+}
